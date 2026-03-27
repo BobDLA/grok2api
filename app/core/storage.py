@@ -1313,9 +1313,12 @@ class StorageFactory:
 
     _instance: Optional[BaseStorage] = None
 
-    # SSL-related query parameters that async drivers (asyncpg, aiomysql)
-    # cannot accept via the URL and must be passed as connect_args instead.
+    # Query parameters that async drivers cannot accept directly via the URL.
+    # SSL-related items may need to be translated into connect_args, while
+    # some provider-specific parameters (for example Neon channel_binding)
+    # must simply be dropped.
     _SQL_SSL_PARAM_KEYS = ("sslmode", "ssl-mode", "ssl")
+    _SQL_IGNORED_QUERY_PARAM_KEYS = ("channel_binding",)
 
     # Canonical postgres ssl modes (asyncpg accepts libpq-style mode strings).
     _PG_SSL_MODE_ALIASES: ClassVar[dict[str, str]] = {
@@ -1469,10 +1472,13 @@ class StorageFactory:
         ssl_mode: Optional[str] = None
         filtered_query_items = []
         ssl_param_keys = {k.lower() for k in cls._SQL_SSL_PARAM_KEYS}
+        ignored_param_keys = {k.lower() for k in cls._SQL_IGNORED_QUERY_PARAM_KEYS}
         for key, value in parse_qsl(parsed.query, keep_blank_values=True):
             if key.lower() in ssl_param_keys:
                 if ssl_mode is None and value:
                     ssl_mode = value
+                continue
+            if key.lower() in ignored_param_keys:
                 continue
             filtered_query_items.append((key, value))
 
