@@ -3,6 +3,7 @@ API 认证模块
 """
 
 import hmac
+import os
 from typing import Optional, Iterable
 from fastapi import HTTPException, status, Security
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
@@ -13,6 +14,8 @@ DEFAULT_API_KEY = ""
 DEFAULT_APP_KEY = "grok2api"
 DEFAULT_FUNCTION_KEY = ""
 DEFAULT_FUNCTION_ENABLED = False
+ENV_API_KEY = "API_KEY"
+ENV_APP_KEY = "APP_KEY"
 
 # 定义 Bearer Scheme
 security = HTTPBearer(
@@ -22,13 +25,24 @@ security = HTTPBearer(
 )
 
 
+def _get_non_empty_env(name: str) -> Optional[str]:
+    """Return a stripped env var when present and non-empty."""
+    raw = os.getenv(name)
+    if raw is None:
+        return None
+    value = raw.strip()
+    return value or None
+
+
 def get_admin_api_key() -> str:
     """
     获取后台 API Key。
 
     为空时表示不启用后台接口认证。
     """
-    api_key = get_config("app.api_key", DEFAULT_API_KEY)
+    api_key = _get_non_empty_env(ENV_API_KEY)
+    if api_key is None:
+        api_key = get_config("app.api_key", DEFAULT_API_KEY)
     return api_key or ""
 
 
@@ -56,7 +70,9 @@ def get_app_key() -> str:
     """
     获取 App Key（后台管理密码）。
     """
-    app_key = get_config("app.app_key", DEFAULT_APP_KEY)
+    app_key = _get_non_empty_env(ENV_APP_KEY)
+    if app_key is None:
+        app_key = get_config("app.app_key", DEFAULT_APP_KEY)
     return app_key or ""
 
 def get_function_api_key() -> str:

@@ -59,6 +59,10 @@ docker compose up -d
 > Render free instances sleep after 15 minutes of inactivity; redeploy/restart will lose data.
 >
 > For persistence, use MySQL / Redis / PostgreSQL and set `SERVER_STORAGE_TYPE` and `SERVER_STORAGE_URL`.
+>
+> For Neon + Render, prefer the direct PostgreSQL connection string with `?sslmode=require`.
+>
+> When `APP_KEY` / `API_KEY` are set, they override `app.app_key` / `app.api_key` from config.
 
 <br>
 
@@ -93,8 +97,12 @@ docker compose up -d
 | `SERVER_WORKERS` | Server worker count | `1` | `2` |
 | `SERVER_STORAGE_TYPE` | Storage type (`local`/`redis`/`mysql`/`pgsql`) | `local` | `pgsql` |
 | `SERVER_STORAGE_URL` | Storage DSN (optional for local) | `""` | `postgresql+asyncpg://user:password@host:5432/db` |
+| `APP_KEY` | Admin password (overrides `app.app_key` when non-empty) | `""` | `your-admin-password` |
+| `API_KEY` | Bearer key for OpenAI-compatible APIs (overrides `app.api_key` when non-empty) | `""` | `sk-your-api-key` |
 
 > MySQL example: `mysql+aiomysql://user:password@host:3306/db` (if you provide `mysql://`, it will be converted to `mysql+aiomysql://`).
+>
+> PostgreSQL / Neon example: `postgresql://user:password@host/db?sslmode=require`
 
 <br>
 

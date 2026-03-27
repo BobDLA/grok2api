@@ -59,6 +59,10 @@ docker compose up -d
 > Render 免费实例 15 分钟无访问会休眠；重启/重新部署会丢失数据。
 >
 > 持久化请使用 MySQL / Redis / PostgreSQL，并设置：`SERVER_STORAGE_TYPE` 与 `SERVER_STORAGE_URL`。
+>
+> 使用 Neon + Render 时，建议填写 Neon 的 direct PostgreSQL 连接串，并带上 `?sslmode=require`。
+>
+> 若设置了环境变量 `APP_KEY` / `API_KEY`，它们会优先覆盖配置中的 `app.app_key` / `app.api_key`。
 
 <br>
 
@@ -93,8 +97,12 @@ docker compose up -d
 | `SERVER_WORKERS` | 服务进程数量 | `1` | `2` |
 | `SERVER_STORAGE_TYPE` | 存储类型（`local`/`redis`/`mysql`/`pgsql`） | `local` | `pgsql` |
 | `SERVER_STORAGE_URL` | 存储连接串（local 时可为空） | `""` | `postgresql+asyncpg://user:password@host:5432/db` |
+| `APP_KEY` | 后台登录密码（非空时覆盖 `app.app_key`） | `""` | `your-admin-password` |
+| `API_KEY` | OpenAI 兼容接口 Bearer Key（非空时覆盖 `app.api_key`） | `""` | `sk-your-api-key` |
 
 > MySQL 示例：`mysql+aiomysql://user:password@host:3306/db`（若填 `mysql://` 会自动转为 `mysql+aiomysql://`）
+>
+> PostgreSQL / Neon 示例：`postgresql://user:password@host/db?sslmode=require`
 
 <br>
 
